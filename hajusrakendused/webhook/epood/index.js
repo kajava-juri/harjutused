@@ -21,29 +21,59 @@ const products =  [
 ];
 const orders = [];
 
+//READ
 app.get("/api/products", (req, res) => {
   res.send(products)
 })
 
+//CREATE
 app.post("/api/products", (req, res) => {
   const product = {...req.body, id: Math.ceil(Math.random()*100000)}
   products.push(product)
-  res.send(product)
+  res.send(product);
+})
+
+//DELETE
+app.delete("/api/products/:id", (req, res) => {
+  let productId = products.map(p => p.id).indexOf(parseInt(req.params.id));
+  products.splice(productId, 1);
+  res.status(202).send();
+})
+
+//PUT
+app.put("/api/products/:id", (req, res) => {
+  let product = products.find(p => p.id == req.params.id);
+  let productid = products.map(p => p.id).indexOf(parseInt(req.params.id));
+  let newProduct = req.body;
+  let test = {id: 1, name: "Toode 1", price: 10};
+
+  Object.keys(newProduct).forEach(key => {
+    product[key] = newProduct[key];
+  })
+
+  products[productid] = product;
+
+  res.status(201).send({new: {...product}});
+
 })
 
 // CRUD ülesanne
 // DELETE /api/products/5
 // PUT /api/products/5   {price: 24.44}
 
+//READ
 app.get("/api/orders", (req, res) => {
   res.send(orders)
 })
 
+//CREATE
 app.post("/api/orders", (req, res) => {
   const order = {...req.body, id: Math.ceil(Math.random()*100000)}
   orders.push(order)
   res.send(order)
 })
+
+//DELETE
 
 /**
  * This is public endpoint - fetch all cart products from database and create new order
