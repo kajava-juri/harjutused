@@ -1,15 +1,43 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { Input, Button, Checkbox, List, Col, Row, Space, Divider } from "antd";
 import produce from "immer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router";
 
 
-export default function TaskList() {
-    const [tasks, setTasks] = useState([
-        {id: 1, name: "Task 1", completed: false},
-        {id: 2, name: "Task 2", completed: true},
-    ]);
 
+export default function TaskList({token}) {
+    const [tasks, setTasks] = useState([]);
+
+    const location = useLocation();
+
+    const newTaskInitialValues = {
+        title: "", 
+        desc: ""
+    };
+
+    let [newTaskValues, setNewTaskValues] = useState(newTaskInitialValues);
+
+    useEffect(() => {
+        fetchData();
+      }, []);
+
+
+    function fetchData(){
+        fetch("http://demo2.z-bit.ee/tasks", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${location.state.token}`,
+            },
+        })
+        .then(response => response.json())
+        .then(response => {
+            console.log(response);
+            let newArray = response.slice();
+            setTasks(newArray);
+        })
+
+    }
     const handleNameChange = (task, event) => {
         console.log(event)
         const newTasks = produce(tasks, draft => {
@@ -35,6 +63,11 @@ export default function TaskList() {
                 name: "",
                 completed: false
             });
+
+            fetch("http://demo2.z-bit.ee/tasks", {
+                method: "POST",
+                body: JSON.stringify()
+            })
         }));
     };
 
@@ -58,8 +91,8 @@ export default function TaskList() {
                     renderItem={(task) => <List.Item key={task.id}>
                         <Row type="flex" justify="space-between" align="middle" style={{width: '100%'}}>
                             <Space>
-                                <Checkbox checked={task.completed} onChange={(e) => handleCompletedChange(task, e)} />
-                                <Input value={task.name} onChange={(event) => handleNameChange(task, event)} />
+                                <Checkbox checked={task.marked_as_done} onChange={(e) => handleCompletedChange(task, e)} />
+                                <Input value={task.title} onChange={(event) => handleNameChange(task, event)} />
                             </Space>
                             <Button type="text" onClick={() => handleDeleteTask(task)}><DeleteOutlined /></Button>
                         </Row>

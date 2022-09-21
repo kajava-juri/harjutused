@@ -5,14 +5,33 @@ export default function Login() {
     const navigate = useNavigate();
 
     const onFinish = (values) => {
-        console.log('Success:', values);
-        notification.success({
-            message: 'Logged in'
-        });
-        notification.error({
-            message: 'Wrong username or password'
-        });
-        navigate("/");
+        let response = fetch("http://demo2.z-bit.ee/users/get-token", {
+            method: "POST",
+            body: JSON.stringify(values),
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(response => {
+            
+            if(response.status === 400){
+                notification.error({
+                    message: 'Wrong username or password'
+                });
+                navigate("/login");
+            }
+            else{
+                const token = response.access_token;
+                notification.success({
+                    message: 'Logged in'
+                });
+                navigate("/", {state: {token: token}});
+            }
+        })
+        .catch(error => console.log(error));
+        
+        
     };
 
     return (
